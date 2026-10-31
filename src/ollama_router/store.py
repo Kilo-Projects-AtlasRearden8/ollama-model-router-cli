@@ -6,7 +6,7 @@ import json
 import os
 import uuid
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 
 def save_result(result: Dict[str, Any], output_dir: str = "results") -> str:
@@ -23,8 +23,6 @@ def save_result(result: Dict[str, Any], output_dir: str = "results") -> str:
 
 def save_results(results, output_dir: str = "results") -> List[str]:
     """Save many result records. Returns the list of file paths."""
-    from typing import List  # local import to keep module import order simple
-
     paths: List[str] = []
     for result in results:
         paths.append(save_result(result, output_dir))

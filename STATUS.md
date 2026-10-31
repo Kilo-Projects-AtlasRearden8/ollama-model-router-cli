@@ -4,7 +4,8 @@
 
 `ollama-model-router` — a local-first Python CLI that routes prompts to
 Ollama models by task type, compares responses across models, and saves every
-result as a timestamped JSON file under `results/`.
+result as a timestamped JSON file under `results/`. No API keys, no accounts,
+nothing leaves your machine.
 
 * `src/ollama_router/client.py` — thin client over an OpenAI-compatible
   `/v1/chat/completions` endpoint using only the Python standard library
@@ -18,13 +19,17 @@ result as a timestamped JSON file under `results/`.
   `list-models`; flags and environment variables (`OLLAMA_ENDPOINT`,
   `OLLAMA_MODEL_MAP`, `OLLAMA_MODEL`, `OLLAMA_TIMEOUT`, `OLLAMA_OUTPUT_DIR`)
   for configuration.
+* `src/ollama_router/__main__.py` — allows `python -m ollama_router`.
 * `pyproject.toml` — installs the `ollama-route` console script, no external
   dependencies.
-* `tests/` — 11 tests against a mock OpenAI-compatible endpoint (no network,
+* `tests/` — 22 tests against a mock OpenAI-compatible endpoint (no network,
   no API keys): client chat/models, unreachable endpoint handling, model map
-  routing, default fallback, overrides, compare modes, file storage.
+  routing, default fallback, overrides, compare modes, file storage, config
+  loading/env vars/validation, and CLI exit codes.
 * `LICENSE` — MIT, Copyright (c) 2026 Asdale Dynamics, LLC.
-* `README.md` — usage, configuration, crediting Asdale Dynamics, LLC.
+* `README.md` — beginner-friendly usage, configuration, privacy notes,
+  crediting Asdale Dynamics, LLC.
+* `.gitignore` — excludes Python bytecode, caches, build artifacts, results.
 
 ## How to run
 
@@ -34,8 +39,11 @@ cd /workspace/kilo-lab/ollama-model-router-cli
 # Run tests (mock endpoint, no Ollama needed, no keys)
 PYTHONPATH=src python3 -m pytest
 
-# Install the command
-pip install -e .        # or use a virtualenv
+# Install the command (use a virtualenv on externally-managed Python)
+pip install -e .
+
+# Run directly without installing
+PYTHONPATH=src python3 -m ollama_router --help
 
 # Needs a local endpoint (Ollama default)
 ollama serve
@@ -46,16 +54,18 @@ ollama-route "Summarize this" --tasks summary creative analysis
 ollama-route list-models
 ```
 
+Global options like `--endpoint` go **before** the subcommand.
+
 Results are saved to `results/` as timestamped JSON files.
 
 ## Verification
 
-* `pytest`: 11 passed, 0 failed (mock endpoint, standard library only).
+* `pytest`: 22 passed, 0 failed (mock endpoint, standard library only).
 * CLI smoke-tested end-to-end against a mock endpoint: `route` prints the
   response and writes `results/`, `list-models` lists endpoint models,
   `compare` prints all responses and saves them.
-* `pip install -e .` verified in a virtualenv; `ollama-route` entry point
-  works.
+* `pip install -e .` verified in a virtualenv; both the `ollama-route`
+  entry point and `python -m ollama_router` work.
 
 ## Known gaps
 
@@ -66,3 +76,5 @@ Results are saved to `results/` as timestamped JSON files.
 * No authentication support (by design — no keys/secrets).
 * Default task-to-model map models (e.g. `deepseek-coder-v2:latest`) must be
   pulled into Ollama before routing to them.
+* argparse requires global options (`--endpoint`, etc.) before the subcommand;
+  placing them after the subcommand is an error. Documented in the README.
