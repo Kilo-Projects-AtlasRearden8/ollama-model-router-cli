@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ollama-model-router"
+version = "0.1.0"
+description = "Python CLI that routes prompts to Ollama models by task type, compares responses, and saves results locally."
+requires-python = ">=3.9"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [{name = "Asdale Dynamics, LLC"}]
+dependencies = []
+
+[project.scripts]
+ollama-route = "ollama_router.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
